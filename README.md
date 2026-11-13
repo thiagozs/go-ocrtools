@@ -1,89 +1,103 @@
 # OCR Tools
 
-Cross-platform (Linux, Windows, macOS) system tray utility built with Go and
-[Wails v3](https://v3.wails.io/). Capture any region of the screen, extract the
-text with [Tesseract](https://github.com/tesseract-ocr/tesseract) and copy it to
-the clipboard.
+🇺🇸 [English version](README-us.md)
 
-> Status: Linux (GNOME/Wayland) is tested end to end. Windows and macOS code
-> compiles (`go vet` with `GOOS`), but has never been run.
+Utilitário de bandeja do sistema multiplataforma (Linux, Windows, macOS)
+feito em Go com [Wails v3](https://v3.wails.io/). Capture qualquer região da
+tela, extraia o texto com [Tesseract](https://github.com/tesseract-ocr/tesseract)
+e copie para a área de transferência.
 
-## Features
+> Status: Linux (GNOME/Wayland) testado de ponta a ponta. O código para Windows
+> e macOS compila (`go vet` com `GOOS`), mas nunca foi executado.
 
-- **Region capture** – a full-screen overlay opens on every monitor; drag to
-  select the area. Works with multiple monitors, HiDPI and Wayland (via the
-  XDG Desktop Portal). The crop is taken from the original screenshot, so
-  resolution is preserved.
-- **OCR** – Tesseract CLI (no cgo), with preprocessing: grayscale, upscaling of
-  small crops and automatic inversion of dark backgrounds.
-- **Result** – text is copied automatically (optional) and shown in a window.
-- **System tray** – menu with *Capture text*, *Settings* and *Quit*; clicking
-  the icon starts a capture.
-- **Global hotkey** – default `CmdOrCtrl+Alt+O`, configurable. On Wayland it
-  uses the GlobalShortcuts portal.
-- **Tesseract setup** – detects the binary, offers a guided/automatic install
-  and downloads language data (`tessdata_fast`) into `~/.config/ocrtools/tessdata`.
-- **Start at login** – per-OS autostart toggle in Settings.
-- **Self-install** – install the app for the current user or for all users,
-  following each OS's conventions (see below), and uninstall from Settings.
-- **Proper desktop identity** – app id `io.github.thiagozs.ocrtools`, so the
-  dock/taskbar shows the right name and icon.
+## Funcionalidades
 
-## Requirements
+- **Captura de região** – um overlay em tela cheia abre em cada monitor; arraste
+  para selecionar a área. Funciona com vários monitores, HiDPI e Wayland (via
+  XDG Desktop Portal). O recorte é feito a partir do screenshot original, então
+  a resolução é preservada.
+- **OCR** – Tesseract via CLI (sem cgo), com pré-processamento: escala de cinza,
+  ampliação de recortes pequenos e inversão automática de fundos escuros.
+- **Resultado** – o texto é copiado automaticamente (opcional) e exibido em uma
+  janela.
+- **Bandeja do sistema** – menu com *Capturar texto*, *Configurações* e *Sair*;
+  clicar no ícone inicia uma captura.
+- **Atalho global** – padrão `CmdOrCtrl+Alt+O`, configurável. No Wayland usa o
+  portal GlobalShortcuts.
+- **Configuração do Tesseract** – detecta o binário, oferece instalação guiada
+  ou automática e baixa os idiomas (`tessdata_fast`) em
+  `~/.config/ocrtools/tessdata`.
+- **Iniciar com o sistema** – opção por sistema operacional nas Configurações.
+- **Autoinstalação** – instala o app para o usuário atual ou para todos,
+  seguindo as convenções de cada SO (veja abaixo), e desinstala pelas
+  Configurações.
+- **Identidade correta no desktop** – app id `io.github.thiagozs.ocrtools`, para
+  que o dock/barra de tarefas mostre o nome e o ícone certos.
 
-- Go 1.25+ (see `go.mod`), Node.js + npm (frontend), `wails3` CLI.
-- **Tesseract** at runtime (the app can help install it).
-- Linux build: `libgtk-4-dev`, `libwebkitgtk-6.0-dev`,
-  `libayatana-appindicator3-dev`. On Wayland: `xdg-desktop-portal` plus your
-  desktop's portal backend.
+## Requisitos
 
-## Build and run
+- Go 1.25+ (veja `go.mod`), Node.js + npm (frontend), CLI `wails3`.
+- **Tesseract** em tempo de execução (o app ajuda a instalar).
+- Build no Linux: `libgtk-4-dev`, `libwebkitgtk-6.0-dev`,
+  `libayatana-appindicator3-dev`. No Wayland: `xdg-desktop-portal` e o backend
+  de portal do seu desktop.
+
+## Build e execução
 
 ```sh
 go install github.com/wailsapp/wails/v3/cmd/wails3@latest
-wails3 dev                  # development, hot reload
-wails3 build               # production binary in bin/
-wails3 package             # installers/packages for the current OS
+wails3 dev                  # desenvolvimento, hot reload
+wails3 build               # binário de produção em bin/
+wails3 package             # instaladores/pacotes para o SO atual
 go test ./...
 ```
 
-After changing exported service methods, regenerate the bindings:
+Depois de alterar métodos exportados do serviço, regenere os bindings:
 
 ```sh
 wails3 generate bindings -clean=true
 ```
 
-## Install locations
+## Locais de instalação
 
-| OS      | User                                  | All users                     |
+| SO      | Usuário                               | Todos os usuários             |
 |---------|---------------------------------------|-------------------------------|
-| Linux   | `~/.local/opt/ocrtools` (+ `~/.local/bin` link, `.desktop`) | `/opt/ocrtools` (via `pkexec`) |
-| Windows | `%LOCALAPPDATA%\Programs\OCR Tools`   | `Program Files` (elevated)    |
-| macOS   | `~/Applications` (`.app` bundle)      | `/Applications` (admin prompt)|
+| Linux   | `~/.local/opt/ocrtools` (+ link em `~/.local/bin`, `.desktop`) | `/opt/ocrtools` (via `pkexec`) |
+| Windows | `%LOCALAPPDATA%\Programs\OCR Tools`   | `Program Files` (elevado)     |
+| macOS   | `~/Applications` (bundle `.app`)      | `/Applications` (senha de admin) |
 
-Settings are stored in the user config dir under `ocrtools/settings.json`.
+As configurações ficam no diretório de config do usuário, em
+`ocrtools/settings.json`.
 
-## Project layout
+## Estrutura do projeto
 
 ```
-main.go, service.go     app setup, tray, OCRService exposed to the frontend
-monitors*.go            per-monitor geometry (GDK on Linux, Wails elsewhere)
-relaunch_*.go           restart after self-install
-internal/capture        screenshot (X11/native, Wayland portal)
-internal/ocr            Tesseract engine, installer plan, language downloader
-internal/hotkey         global shortcut backends (Wails / Wayland portal)
-internal/launcher       .desktop entry and app id (Linux)
-internal/install        per-OS install/uninstall
-internal/config         settings store
-frontend/               vite pages: settings (index), overlay, result
-build/                  icons (appicon.svg, render_icon.py) and packaging
+main.go, service.go     setup do app, bandeja, OCRService exposto ao frontend
+monitors*.go            geometria por monitor (GDK no Linux, Wails nos demais)
+relaunch_*.go           reinício após a autoinstalação
+internal/capture        screenshot (X11/nativo, portal no Wayland)
+internal/ocr            engine Tesseract, plano de instalação, download de idiomas
+internal/hotkey         backends de atalho global (Wails / portal Wayland)
+internal/launcher       entrada .desktop e app id (Linux)
+internal/install        instalar/desinstalar por SO
+internal/config         armazenamento das configurações
+frontend/               páginas vite: configurações (index), overlay, resultado
+build/                  ícones (appicon.svg, render_icon.py) e empacotamento
 ```
 
-## Known limitations
+## Limitações conhecidas
 
-- A selection cannot yet span more than one monitor.
-- System-wide install, uninstall and the "Install Tesseract" button need
-  elevated privileges and have not been exercised end to end.
-- Windows and macOS have not been run.
+- A seleção ainda não pode atravessar mais de um monitor.
+- Instalação para todos, desinstalação e o botão "Instalar Tesseract" exigem
+  privilégios elevados e não foram testados de ponta a ponta.
+- Windows e macOS não foram executados.
 
-See [STEPS.md](STEPS.md) for the development history.
+Veja o [STEPS.md](STEPS.md) para o histórico de desenvolvimento.
+
+## Licença
+
+MIT. Veja o arquivo [LICENSE](LICENSE).
+
+## Autor
+
+2026, Thiago Zilli Sarmento :heart:
