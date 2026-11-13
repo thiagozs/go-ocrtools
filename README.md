@@ -1,59 +1,89 @@
-# Welcome to Your New Wails3 Project!
+# OCR Tools
 
-Congratulations on generating your Wails3 application! This README will guide you through the next steps to get your project up and running.
+Cross-platform (Linux, Windows, macOS) system tray utility built with Go and
+[Wails v3](https://v3.wails.io/). Capture any region of the screen, extract the
+text with [Tesseract](https://github.com/tesseract-ocr/tesseract) and copy it to
+the clipboard.
 
-## Getting Started
+> Status: Linux (GNOME/Wayland) is tested end to end. Windows and macOS code
+> compiles (`go vet` with `GOOS`), but has never been run.
 
-1. Navigate to your project directory in the terminal.
+## Features
 
-2. To run your application in development mode, use the following command:
+- **Region capture** – a full-screen overlay opens on every monitor; drag to
+  select the area. Works with multiple monitors, HiDPI and Wayland (via the
+  XDG Desktop Portal). The crop is taken from the original screenshot, so
+  resolution is preserved.
+- **OCR** – Tesseract CLI (no cgo), with preprocessing: grayscale, upscaling of
+  small crops and automatic inversion of dark backgrounds.
+- **Result** – text is copied automatically (optional) and shown in a window.
+- **System tray** – menu with *Capture text*, *Settings* and *Quit*; clicking
+  the icon starts a capture.
+- **Global hotkey** – default `CmdOrCtrl+Alt+O`, configurable. On Wayland it
+  uses the GlobalShortcuts portal.
+- **Tesseract setup** – detects the binary, offers a guided/automatic install
+  and downloads language data (`tessdata_fast`) into `~/.config/ocrtools/tessdata`.
+- **Start at login** – per-OS autostart toggle in Settings.
+- **Self-install** – install the app for the current user or for all users,
+  following each OS's conventions (see below), and uninstall from Settings.
+- **Proper desktop identity** – app id `io.github.thiagozs.ocrtools`, so the
+  dock/taskbar shows the right name and icon.
 
-   ```
-   wails3 dev
-   ```
+## Requirements
 
-   This will start your application and enable hot-reloading for both frontend and backend changes.
+- Go 1.25+ (see `go.mod`), Node.js + npm (frontend), `wails3` CLI.
+- **Tesseract** at runtime (the app can help install it).
+- Linux build: `libgtk-4-dev`, `libwebkitgtk-6.0-dev`,
+  `libayatana-appindicator3-dev`. On Wayland: `xdg-desktop-portal` plus your
+  desktop's portal backend.
 
-3. To build your application for production, use:
+## Build and run
 
-   ```
-   wails3 build
-   ```
+```sh
+go install github.com/wailsapp/wails/v3/cmd/wails3@latest
+wails3 dev                  # development, hot reload
+wails3 build               # production binary in bin/
+wails3 package             # installers/packages for the current OS
+go test ./...
+```
 
-   This will create a production-ready executable in the `build` directory.
+After changing exported service methods, regenerate the bindings:
 
-## Exploring Wails3 Features
+```sh
+wails3 generate bindings -clean=true
+```
 
-Now that you have your project set up, it's time to explore the features that Wails3 offers:
+## Install locations
 
-1. **Check out the examples**: The best way to learn is by example. Visit the `examples` directory in the `v3/examples` directory to see various sample applications.
+| OS      | User                                  | All users                     |
+|---------|---------------------------------------|-------------------------------|
+| Linux   | `~/.local/opt/ocrtools` (+ `~/.local/bin` link, `.desktop`) | `/opt/ocrtools` (via `pkexec`) |
+| Windows | `%LOCALAPPDATA%\Programs\OCR Tools`   | `Program Files` (elevated)    |
+| macOS   | `~/Applications` (`.app` bundle)      | `/Applications` (admin prompt)|
 
-2. **Run an example**: To run any of the examples, navigate to the example's directory and use:
+Settings are stored in the user config dir under `ocrtools/settings.json`.
 
-   ```
-   go run .
-   ```
+## Project layout
 
-   Note: Some examples may be under development during the alpha phase.
+```
+main.go, service.go     app setup, tray, OCRService exposed to the frontend
+monitors*.go            per-monitor geometry (GDK on Linux, Wails elsewhere)
+relaunch_*.go           restart after self-install
+internal/capture        screenshot (X11/native, Wayland portal)
+internal/ocr            Tesseract engine, installer plan, language downloader
+internal/hotkey         global shortcut backends (Wails / Wayland portal)
+internal/launcher       .desktop entry and app id (Linux)
+internal/install        per-OS install/uninstall
+internal/config         settings store
+frontend/               vite pages: settings (index), overlay, result
+build/                  icons (appicon.svg, render_icon.py) and packaging
+```
 
-3. **Explore the documentation**: Visit the [Wails3 documentation](https://v3.wails.io/) for in-depth guides and API references.
+## Known limitations
 
-4. **Join the community**: Have questions or want to share your progress? Join the [Wails Discord](https://discord.gg/JDdSxwjhGf) or visit the [Wails discussions on GitHub](https://github.com/wailsapp/wails/discussions).
+- A selection cannot yet span more than one monitor.
+- System-wide install, uninstall and the "Install Tesseract" button need
+  elevated privileges and have not been exercised end to end.
+- Windows and macOS have not been run.
 
-## Project Structure
-
-Take a moment to familiarize yourself with your project structure:
-
-- `frontend/`: Contains your frontend code (HTML, CSS, JavaScript/TypeScript)
-- `main.go`: The entry point of your Go backend
-- `app.go`: Define your application structure and methods here
-- `wails.json`: Configuration file for your Wails project
-
-## Next Steps
-
-1. Modify the frontend in the `frontend/` directory to create your desired UI.
-2. Add backend functionality in `main.go`.
-3. Use `wails3 dev` to see your changes in real-time.
-4. When ready, build your application with `wails3 build`.
-
-Happy coding with Wails3! If you encounter any issues or have questions, don't hesitate to consult the documentation or reach out to the Wails community.
+See [STEPS.md](STEPS.md) for the development history.
