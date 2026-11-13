@@ -1,0 +1,21 @@
+module github.com/thiagozs/ocrtools
+
+go 1.26.0
+
+require (
+	github.com/godbus/dbus/v5 v5.2.2
+	github.com/kbinani/screenshot v0.0.0-20250624051815-089614a94018
+	github.com/wailsapp/wails/v3 v3.1.0
+	golang.org/x/image v0.48.0
+)
+
+require (
+	github.com/coder/websocket v1.8.14 // indirect
+	github.com/ebitengine/purego v0.11.1 // indirect
+	github.com/gen2brain/shm v0.1.0 // indirect
+	github.com/go-ole/go-ole v1.3.0 // indirect
+	github.com/jezek/xgb v1.1.1 // indirect
+	github.com/lxn/win v0.0.0-20210218163916-a377121e959e // indirect
+	golang.org/x/sys v0.50.0 // indirect
+	golang.org/x/term v0.46.0 // indirect
+)

@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OCR Tools — Configurações</title><link rel="stylesheet" href="/src/common.css"></head>
+<body>
+<h1>Configurações</h1>
+<section id="engine" class="card">
+  <div id="engineState">Verificando o OCR…</div>
+  <div id="installBox" hidden>
+    <div class="hint">O Tesseract não foi encontrado. Instale com:</div>
+    <code id="installCmd"></code>
+    <div class="hint" id="installNote"></div>
+    <div class="actions"><button id="install">Instalar agora</button><span id="installStatus"></span></div>
+  </div>
+  <div class="actions" id="langBox" hidden>
+    <input id="dlLang" type="text" value="por" aria-label="Idioma a baixar" style="max-width:140px">
+    <button id="download" class="secondary">Baixar idioma</button><span id="dlStatus"></span>
+  </div>
+</section>
+<section id="installCard" class="card">
+  <div id="installState">Verificando instalação…</div>
+  <div class="hint" id="installPath"></div>
+  <div class="actions" id="installActions" hidden>
+    <button id="instUser" class="secondary"></button>
+    <button id="instSystem" class="secondary" hidden></button>
+    <button id="uninst" class="secondary" hidden>Desinstalar</button>
+  </div>
+  <div class="hint" id="installMsg"></div>
+</section>
+<label for="lang">Idioma do OCR</label>
+<input id="lang" type="text" placeholder="por+eng" list="langs">
+<datalist id="langs"></datalist>
+<div class="hint">Use <code style="display:inline;padding:0 4px">+</code> para combinar idiomas (ex.: por+eng).</div>
+<label for="hotkey">Atalho global de captura</label>
+<input id="hotkey" type="text" readonly placeholder="Clique e pressione as teclas">
+<div class="hint">Backspace/Delete desativa. No Wayland (GNOME) o sistema pode pedir confirmação do atalho.</div>
+<div class="row"><input id="autoCopy" type="checkbox"><label for="autoCopy">Copiar o texto automaticamente para a área de transferência</label></div>
+<div class="row"><input id="showResult" type="checkbox"><label for="showResult">Mostrar janela de resultado após cada captura</label></div>
+<div class="row"><input id="autostart" type="checkbox"><label for="autostart">Iniciar com o sistema (abre no tray ao fazer login)</label></div>
+<label for="tess">Caminho do Tesseract (opcional)</label>
+<input id="tess" type="text" placeholder="vazio = usar o do PATH">
+<div class="actions"><button id="save">Salvar</button><span id="status"></span></div>
+<script type="module" src="/src/settings.js"></script>
+</body></html>
